@@ -484,6 +484,7 @@ def http_get(
             max_files = 100
             chunk_size = 10 * 1024 * 1024  # 10 MB
             import datetime
+
             start = datetime.datetime.now()
             download(url, temp_file.name, max_files, chunk_size)
             print(f"Using HF_TRANSFER took {datetime.datetime.now() - start}")
@@ -520,7 +521,9 @@ def http_get(
         desc=f"Downloading (…){displayed_name[-20:]}",
         disable=bool(logger.getEffectiveLevel() == logging.NOTSET),
     )
-    for chunk in r.iter_content(chunk_size=10 * 1024 * 1024):
+    CHUNK_SIZE = int(os.getenv("HF_CHUNK_SIZE", 10 * 1024 * 1024))
+    print(f"chunk size: f{CHUNK_SIZE}")
+    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
         if chunk:  # filter out keep-alive new chunks
             progress.update(len(chunk))
             temp_file.write(chunk)
